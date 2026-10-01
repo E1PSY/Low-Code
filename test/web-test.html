@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    #app { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3.5.38/dist/vue.esm-browser.prod.js",
+      "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+      "@tresjs/core": "https://unpkg.com/@tresjs/core@5.8.2/dist/tres.js",
+      "@tresjs/cientos": "https://unpkg.com/@tresjs/cientos@5.8.0/dist/trescientos.js",
+      "pinia": "https://unpkg.com/pinia@3.0.4/dist/pinia.mjs"
+    }
+  }
+  </script>
+
+  <script type="module">
+  import { createApp, ref, computed, h, defineComponent } from 'vue'
+  import { createPinia, defineStore } from 'pinia'
+  import Tres, { TresCanvas } from '@tresjs/core'
+  import { OrbitControls } from '@tresjs/cientos'
+  import * as THREE from 'three'
+
+  // ========== scene data ==========
+  var SCENE_DATA = [{"type":"Box","position":[0,0.5,0],"rotation":[0,0,0],"scale":[1,1,1],"color":"#3b82f6","visible":true},{"type":"Box","position":[3,0.5,0],"rotation":[0,0,0],"scale":[1,1,1],"color":"#ef4444","visible":true},{"type":"Plane","position":[0,0,0],"rotation":[0,0,0],"scale":[2,1,2],"color":"#6b7280","visible":true}];
+
+  // ========== store ==========
+  var useSceneStore = defineStore('scene', function() {
+    var objs = ref(SCENE_DATA.map(function(o, i) {
+      var x = Object.assign({}, o)
+      x.id = 'obj_' + i
+      return x
+    }))
+    var activeId = ref(null)
+    var active = computed(function() {
+      return objs.value.find(function(o) { return o.id === activeId.value }) || null
+    })
+    return { objects: objs, activeObjectId: activeId, activeObject: active,
+      select: function(id) { activeId.value = id } }
+  })
+
+  
+
+  function _pos(o) { return o.position || [0,0,0] }
+  function _rot(o) { return o.rotation || [0,0,0] }
+  function _sca(o) { var s = o.scale; return s || [1,1,1] }
+
+  var SceneMain = defineComponent({
+    setup: function() {
+      var store = useSceneStore()
+      return function() {
+        return h('div', { style: { width: '100%', height: '100%' } },
+          h(TresCanvas, { clearColor: '#18181a', windowSize: true }, function() {
+            return [
+              h('TresPerspectiveCamera', { position: [5,5,5], lookAt: [0,0,0] }),
+              h(OrbitControls, { makeDefault: true }),
+              h('TresAmbientLight', { intensity: 0.8 }),
+              h('TresGridHelper', { args: [20,20,'#3f3f46','#27272a'] })
+            ].concat(store.objects.map(function(o) {
+              var clr = o.color || '#3b82f6'
+              switch (o.type) {
+                case 'Box': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), onClick: function() { store.select(o.id) } }, function() { return [h('TresBoxGeometry', { args: [1,1,1] }), h('TresMeshStandardMaterial', { color: clr })] })
+                case 'Sphere': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), onClick: function() { store.select(o.id) } }, function() { return [h('TresSphereGeometry', { args: [0.5,32,32] }), h('TresMeshStandardMaterial', { color: clr })] })
+                case 'Cylinder': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), onClick: function() { store.select(o.id) } }, function() { return [h('TresCylinderGeometry', { args: [0.5,0.5,1,32] }), h('TresMeshStandardMaterial', { color: clr })] })
+                case 'Cone': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), onClick: function() { store.select(o.id) } }, function() { return [h('TresConeGeometry', { args: [0.5,1,32] }), h('TresMeshStandardMaterial', { color: clr })] })
+                case 'Plane': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), side: 2, onClick: function() { store.select(o.id) } }, function() { return [h('TresPlaneGeometry', { args: [5,5] }), h('TresMeshStandardMaterial', { color: clr, side: 2 })] })
+                case 'Torus': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), onClick: function() { store.select(o.id) } }, function() { return [h('TresTorusGeometry', { args: [0.5,0.2,16,32] }), h('TresMeshStandardMaterial', { color: clr })] })
+                case 'Ring': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), side: 2, onClick: function() { store.select(o.id) } }, function() { return [h('TresRingGeometry', { args: [0.3,0.6,32] }), h('TresMeshStandardMaterial', { color: clr, side: 2 })] })
+                case 'Icosahedron': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), flatShading: true, onClick: function() { store.select(o.id) } }, function() { return [h('TresIcosahedronGeometry', { args: [0.7,0] }), h('TresMeshStandardMaterial', { color: clr, flatShading: true })] })
+                case 'Octahedron': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), flatShading: true, onClick: function() { store.select(o.id) } }, function() { return [h('TresOctahedronGeometry', { args: [0.7,0] }), h('TresMeshStandardMaterial', { color: clr, flatShading: true })] })
+                case 'Tetrahedron': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), flatShading: true, onClick: function() { store.select(o.id) } }, function() { return [h('TresTetrahedronGeometry', { args: [0.7,0] }), h('TresMeshStandardMaterial', { color: clr, flatShading: true })] })
+                case 'Dodecahedron': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), flatShading: true, onClick: function() { store.select(o.id) } }, function() { return [h('TresDodecahedronGeometry', { args: [0.7,0] }), h('TresMeshStandardMaterial', { color: clr, flatShading: true })] })
+                case 'Lathe': return h('TresMesh', { position: _pos(o), rotation: _rot(o), scale: _sca(o), onClick: function() { store.select(o.id) } }, function() { return [h('TresLatheGeometry', { args: [lathePoints,32,0,Math.PI*2] }), h('TresMeshStandardMaterial', { color: clr })] })
+                case 'DirectionalLight': return h('TresGroup', { position: _pos(o), rotation: _rot(o) }, function() { return [h('TresDirectionalLight', { intensity: 2, color: clr }), h('TresMesh', {}, function() { return [h('TresSphereGeometry', { args: [0.2,16,16] }), h('TresMeshBasicMaterial', { color: clr })] })] })
+                case 'PointLight': return h('TresGroup', { position: _pos(o) }, function() { return [h('TresPointLight', { intensity: 10, color: clr }), h('TresMesh', {}, function() { return [h('TresSphereGeometry', { args: [0.15,16,16] }), h('TresMeshBasicMaterial', { color: clr })] })] })
+                case 'SpotLight': return h('TresGroup', { position: _pos(o), rotation: _rot(o) }, function() { return [h('TresSpotLight', { intensity: 10, color: clr, angle: 0.5, penumbra: 0.3 }), h('TresMesh', {}, function() { return [h('TresConeGeometry', { args: [0.15,0.3,8] }), h('TresMeshBasicMaterial', { color: clr })] })] })
+                case 'HemisphereLight': return h('TresGroup', { position: _pos(o) }, function() { return [h('TresHemisphereLight', { intensity: 2, color: clr, groundColor: '#444444' }), h('TresMesh', {}, function() { return [h('TresSphereGeometry', { args: [0.25,16,16] }), h('TresMeshBasicMaterial', { color: clr })] })] })
+                default: return null
+              }
+            }))
+          })
+        )
+      }
+    }
+  })
+
+  // ========== mount ==========
+  var app = createApp({ render: function() { return h(SceneMain) } })
+  app.use(createPinia())
+  app.use(Tres)
+  app.mount('#app')
+  </script>
+</body>
+</html>

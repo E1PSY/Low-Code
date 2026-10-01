@@ -1,0 +1,18 @@
+{
+  "name": "vue-blender-lowcode-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "基于 Vue + Blender 的低代码 3D 交互应用开发平台",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend start",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "install:all": "npm install && npm --prefix frontend install && npm --prefix backend install",
+    "test": "npm --prefix frontend test && npm --prefix backend test",
+    "test:export": "npm --prefix frontend run test:export"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

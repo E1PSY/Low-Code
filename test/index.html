@@ -1,0 +1,27 @@
+<template>
+  <div class="scene-container">
+    <TresCanvas clear-color="#18181a" window-size>
+      <TresPerspectiveCamera :position="[5,5,5]" :look-at="[0,0,0]" />
+      <OrbitControls />
+      <TresAmbientLight :intensity="0.8" />
+        <InteractableMesh :position="[11, 0.5, -0.4]" :rotation="[0, 0, 0]" :scale="[1, 1, 1]" :interactions="{ onClick: { enabled: false, action: 'none', highlightColor: '#ffff00', animationName: '', moveToPosition: [0, 1, 0], targetColor: '#ff0000', tweenDuration: 1000 }, onHover: { enabled: true, action: 'highlight', highlightColor: '#00ff88', scaleMultiplier: 1.15 }, autoRotate: { enabled: false, speed: 1, axis: 'y' } }">
+          <TresBoxGeometry :args="[1,1,1]" />
+          <TresMeshStandardMaterial :color="'#3b82f6'" />
+        </InteractableMesh>
+        <TresMesh :position="[-0.4, 0.5, -0.3]" :rotation="[0, 0, 0]" :scale="[1, 1, 1]">
+          <TresPlaneGeometry :args="[5,5]" />
+          <TresMeshStandardMaterial :color="'#6b7280'" :side="2" />
+        </TresMesh>
+    </TresCanvas>
+  </div>
+</template>
+
+<script setup>
+import { TresCanvas } from '@tresjs/core'
+import { OrbitControls } from '@tresjs/cientos'
+import InteractableMesh from './InteractableMesh.vue'
+</script>
+
+<style scoped>
+.scene-container { width: 100vw; height: 100vh; overflow: hidden; background-color: #18181a; }
+</style>

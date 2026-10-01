@@ -1,0 +1,16 @@
+{
+  "name": "vue-blender-api",
+  "version": "1.0.0",
+  "description": "Vue-Blender 后端 Blender 模型转换 API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.17",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "multer": "latest"
+  }
+}

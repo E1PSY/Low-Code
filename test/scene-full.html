@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FullTest</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #app { width: 100%; height: 100%; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://cdn.jsdelivr.net/npm/vue@3.5.38/dist/vue.esm-browser.js",
+      "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+      "@tresjs/core": "https://cdn.jsdelivr.net/npm/@tresjs/core@5.7.0/dist/tres.js",
+      "@tresjs/cientos": "https://cdn.jsdelivr.net/npm/@tresjs/cientos@5.7.0/dist/trescientos.js"
+    }
+  }
+  </script>
+
+  <script type="module">
+  import { createApp } from "vue"
+  import Tres, { TresCanvas } from "@tresjs/core"
+  import { OrbitControls } from "@tresjs/cientos"
+  import * as THREE from "three"
+
+  // Configure Vue to recognize Tres* custom elements
+  const app = createApp({
+    template: `
+      <div style="width:100%;height:100%">
+        <TresCanvas clear-color="#18181a" window-size>
+          <TresPerspectiveCamera :position="[5,5,5]" :look-at="[0,0,0]" />
+          <OrbitControls make-default />
+          <TresAmbientLight :intensity="0.8" />
+          <TresGridHelper :args="[20,20,'#3f3f46','#27272a']" />
+        <TresMesh :position="[0,0.5,0]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresBoxGeometry :args="[1,1,1]" />
+          <TresMeshStandardMaterial color="#3b82f6" />
+        </TresMesh>
+        <TresMesh :position="[2,0.5,0]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresSphereGeometry :args="[0.5,32,32]" />
+          <TresMeshStandardMaterial color="#ef4444" />
+        </TresMesh>
+        <TresMesh :position="[-2,0.5,0]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresCylinderGeometry :args="[0.5,0.5,1,32]" />
+          <TresMeshStandardMaterial color="#22c55e" />
+        </TresMesh>
+        <TresMesh :position="[0,1,0]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresConeGeometry :args="[0.5,1,32]" />
+          <TresMeshStandardMaterial color="#f59e0b" />
+        </TresMesh>
+        <TresMesh :position="[0,0,0]" :rotation="[0,0,0]" :scale="[5,1,5]">
+          <TresPlaneGeometry :args="[5,5]" />
+          <TresMeshStandardMaterial color="#6b7280" :side="2" />
+        </TresMesh>
+        <TresMesh :position="[3,0.5,1]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresTorusGeometry :args="[0.5,0.2,16,32]" />
+          <TresMeshStandardMaterial color="#a855f7" />
+        </TresMesh>
+        <TresMesh :position="[-3,0.5,1]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresIcosahedronGeometry :args="[0.7,0]" />
+          <TresMeshStandardMaterial color="#ec4899" :flat-shading="true" />
+        </TresMesh>
+        <TresGroup :position="[3,3,3]" :rotation="[0,0,0]">
+          <TresDirectionalLight :intensity="2" color="#fef3c7" />
+        </TresGroup>
+        <TresGroup :position="[-3,3,3]">
+          <TresPointLight :intensity="10" color="#fef08a" />
+        </TresGroup>
+        <TresGroup :position="[0,3,3]" :rotation="[0,0,0]">
+          <TresSpotLight :intensity="10" color="#ffffff" :angle="0.5" :penumbra="0.3" />
+        </TresGroup>
+        <TresGroup :position="[0,4,0]">
+          <TresHemisphereLight :intensity="2" color="#87ceeb" ground-color="#444444" />
+        </TresGroup>
+        <TresMesh :position="[1,1,2]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresRingGeometry :args="[0.3,0.6,32]" />
+          <TresMeshStandardMaterial color="#84cc16" :side="2" />
+        </TresMesh>
+        <TresMesh :position="[-1,0.7,2]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresDodecahedronGeometry :args="[0.7,0]" />
+          <TresMeshStandardMaterial color="#06b6d4" :flat-shading="true" />
+        </TresMesh>
+        <TresMesh :position="[3,0.7,2]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresOctahedronGeometry :args="[0.7,0]" />
+          <TresMeshStandardMaterial color="#f97316" :flat-shading="true" />
+        </TresMesh>
+        <TresMesh :position="[-3,0.7,2]" :rotation="[0,0,0]" :scale="[1,1,1]">
+          <TresTetrahedronGeometry :args="[0.7,0]" />
+          <TresMeshStandardMaterial color="#8b5cf6" :flat-shading="true" />
+        </TresMesh>
+        </TresCanvas>
+      </div>
+    `
+  })
+
+  // Register OrbitControls globally
+  app.component("OrbitControls", OrbitControls)
+
+  // Tell Vue to treat unknown Tres* tags as custom elements
+  // This is the runtime equivalent of the vite templateCompilerOptions
+  app.config.compilerOptions.isCustomElement = function(tag) {
+    return /^Tres[A-Z]/.test(tag) || tag.startsWith("tres-")
+  }
+
+  // Register TresJS plugin (registers TresCanvas globally)
+  app.use(Tres)
+
+  app.mount("#app")
+  </script>
+</body>
+</html>
