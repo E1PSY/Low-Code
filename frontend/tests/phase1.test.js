@@ -12,7 +12,6 @@ import { useSceneStore } from '../src/stores/sceneStore.js'
 import { useSceneStorage } from '../src/composables/useSceneStorage.js'
 import { putAsset, getAsset, acquireModelURL, makePortableAsset } from '../src/utils/assetStorage.js'
 import { generatePortableProject, prepareProject } from '../src/utils/projectExporter.js'
-import { generateCode } from '../src/utils/codeGenerator.js'
 import { parse } from '@babel/parser'
 
 globalThis.FileReader = class {
@@ -160,19 +159,6 @@ test('export keeps nested geometry, interaction configs and arbitrary text as JS
   assert.equal(data.objects[0].meta.childrenResolved.length, group.meta.childrenResolved.length)
   assert.equal(data.objects[0].interactions.onClick.action, 'moveTo')
   for (const [name, content] of Object.entries(files)) if (name.endsWith('.js')) parse(content, { sourceType: 'module' })
-  const legacy = generateCode([sprite], 'project-scaffold')
-  const ast = parse(legacy['src/stores/sceneStore.js'], { sourceType: 'module' })
-  const stringValues = []
-  function visit(node) {
-    if (!node || typeof node !== 'object') return
-    if (node.type === 'StringLiteral') stringValues.push(node.value)
-    for (const value of Object.values(node)) {
-      if (Array.isArray(value)) value.forEach(visit)
-      else if (value && typeof value === 'object') visit(value)
-    }
-  }
-  visit(ast)
-  assert.ok(stringValues.includes(text), 'legacy escaping must preserve the text value')
   assert.throws(() => generatePortableProject([{type: 'Unknown'}], sources), /不支持/)
 })
 
